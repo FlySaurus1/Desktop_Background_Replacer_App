@@ -1,3 +1,4 @@
+
 package com.example.wallpaper_app;
 
 import javafx.application.Platform;
@@ -104,24 +105,25 @@ public class MainController {
         }
 
         scheduler.start(() -> {
-            scheduler.getNextChange().ifPresent(entry -> {
-                try {
-                    wallpaperChanger.setWallpaper(entry.getValue());
-                    Platform.runLater(() -> {
-                        view.getStatusLabel().setText("Обои изменены: " +
-                                entry.getKey().format(DateTimeFormatter.ofPattern("HH:mm")) +
-                                " - " + entry.getValue().getName());
-                    });
-                } catch (Exception e) {
-                    Platform.runLater(() ->
-                            view.getStatusLabel().setText("Ошибка: " + e.getMessage()));
-                }
+            scheduler.getNextScheduledWallpaper().ifPresent(nextEntry -> {
+                Platform.runLater(() -> {
+                    view.getStatusLabel().setText(
+                            "Следующая смена: " +
+                                    nextEntry.getKey().format(DateTimeFormatter.ofPattern("HH:mm")) +
+                                    " - " + nextEntry.getValue().getName()
+                    );
+                });
             });
         });
 
-        scheduler.getNextChange().ifPresent(entry ->
-                view.getStatusLabel().setText("Планировщик запущен. Следующая смена: " +
-                        entry.getKey().format(DateTimeFormatter.ofPattern("HH:mm"))));
+        // Показываем текущий статус
+        scheduler.getNextScheduledWallpaper().ifPresent(nextEntry -> {
+            view.getStatusLabel().setText(
+                    "Планировщик запущен. Следующая смена: " +
+                            nextEntry.getKey().format(DateTimeFormatter.ofPattern("HH:mm")) +
+                            " - " + nextEntry.getValue().getName()
+            );
+        });
     }
 
     private void stopScheduler() {
