@@ -1,8 +1,11 @@
 package com.example.wallpaper_app;
 
+import javafx.application.Platform;
+
 import java.io.*;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class WallpaperScheduler implements Serializable {
     private static final String SCHEDULE_FILE = "schedule.dat";
@@ -23,19 +26,31 @@ public class WallpaperScheduler implements Serializable {
         return Collections.unmodifiableMap(schedule);
     }
 
-    public Optional<Map.Entry<LocalTime, File>> getNextChange() {
+    public Optional<Map.Entry<LocalTime, File>> getNextScheduledWallpaper() {
         LocalTime now = LocalTime.now();
-        return schedule.entrySet().stream()
-                .filter(entry -> entry.getKey().isAfter(now))
-                .findFirst()
-                .or(() -> schedule.isEmpty() ? Optional.empty()
-                        : Optional.of(schedule.firstEntry()));
+
+        for (Map.Entry<LocalTime, File> entry : schedule.entrySet()) {
+            if (entry.getKey().isAfter(now)) {
+                return Optional.of(entry);
+            }
+        }
+
+        // Если ничего не найдено в оставшейся части дня, берем первое на завтра
+        if (!schedule.isEmpty()) {
+            return Optional.of(schedule.firstEntry());
+        }
+
+        return Optional.empty();
     }
 
     public void start(Runnable onChangeAction) {
         stop();
+        timer = new Timer();
+
+        // Планируем следующую смену
         scheduleNextChange(onChangeAction);
     }
+
 
     public void stop() {
         if (timer != null) {
@@ -45,25 +60,42 @@ public class WallpaperScheduler implements Serializable {
     }
 
     private void scheduleNextChange(Runnable onChangeAction) {
-        getNextChange().ifPresent(entry -> {
-            long delay = calculateDelay(LocalTime.now(), entry.getKey());
-            timer = new Timer();
+        getNextScheduledWallpaper().ifPresent(nextEntry -> {
+            long delay = calculateDelay(LocalTime.now(), nextEntry.getKey());
+
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    onChangeAction.run();
-                    scheduleNextChange(onChangeAction);
+                    try {
+                        new WallpaperChanger().setWallpaper(nextEntry.getValue());
+                        Platform.runLater(onChangeAction);
+
+                        // Планируем следующую смену
+                        scheduleNextChange(onChangeAction);
+                    } catch (Exception e) {
+                        Platform.runLater(() ->
+                                System.err.println("Ошибка: " + e.getMessage()));
+                    }
                 }
             }, delay);
+
+            Platform.runLater(() ->
+                    System.out.println("Следующая смена через " +
+                            TimeUnit.MILLISECONDS.toMinutes(delay) + " минут"));
         });
     }
+
 
     private long calculateDelay(LocalTime now, LocalTime scheduledTime) {
         long nowSeconds = now.toSecondOfDay();
         long scheduledSeconds = scheduledTime.toSecondOfDay();
-        return (scheduledSeconds > nowSeconds)
-                ? (scheduledSeconds - nowSeconds) * 1000
-                : (24*3600 - nowSeconds + scheduledSeconds) * 1000;
+
+        if (scheduledSeconds > nowSeconds) {
+            return (scheduledSeconds - nowSeconds) * 1000;
+        } else {
+            // Если время уже прошло сегодня, планируем на завтра
+            return (24 * 3600 - nowSeconds + scheduledSeconds) * 1000;
+        }
     }
 
     public void saveSchedule() {
