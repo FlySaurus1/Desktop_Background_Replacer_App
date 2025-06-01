@@ -16,17 +16,24 @@ public class MainView {
     private final ListView<String> scheduleListView = new ListView<>();
     private final ComboBox<Integer> hourComboBox = new ComboBox<>();
     private final ComboBox<Integer> minuteComboBox = new ComboBox<>();
-    private final Button selectImageBtn = new Button("Выбрать изображение");
-    private final Button addToScheduleBtn = new Button("Добавить в расписание");
-    private final Button removeFromScheduleBtn = new Button("Удалить из расписания");
+    private final Button selectImageBtn = new Button("\uD83D\uDDBC Выбрать изображение");
+    private final Label timeSetting = new Label("\uD83D\uDD50 Время смены:");
+    private final Button addToScheduleBtn = new Button("\uD83D\uDCCD Добавить в расписание");
+    private final Button removeFromScheduleBtn = new Button("\uD83D\uDDD1 Удалить из расписания");
     private final Button startBtn = new Button("Старт");
     private final Button stopBtn = new Button("Стоп");
-    private final Label statusLabel = new Label("Готово к работе");
+    private final Label statusLabel = new Label("Готово к работе ✔");
 
     public MainView() {
         setupFileChooser();
         setupImagePreview();
         setupTimeSelectors();
+        setupButtonStyles();
+    }
+
+    private void setupButtonStyles() {
+        startBtn.setStyle("-fx-background-color: #0F7A0A; -fx-text-fill: white; -fx-background-radius: 10;");
+        stopBtn.setStyle("-fx-background-color: #FF0000; -fx-text-fill: white; -fx-background-radius: 10;");
     }
 
     private void setupFileChooser() {
@@ -74,6 +81,7 @@ public class MainView {
     public ComboBox<Integer> getHourComboBox() { return hourComboBox; }
     public ComboBox<Integer> getMinuteComboBox() { return minuteComboBox; }
     public Button getSelectImageBtn() { return selectImageBtn; }
+    public Label getTimeSetting() { return timeSetting; }
     public Button getAddToScheduleBtn() { return addToScheduleBtn; }
     public Button getRemoveFromScheduleBtn() { return removeFromScheduleBtn; }
     public Button getStartBtn() { return startBtn; }

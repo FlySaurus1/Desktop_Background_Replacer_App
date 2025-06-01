@@ -1,9 +1,11 @@
 package com.example.wallpaper_app;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 public class App extends Application {
@@ -12,20 +14,23 @@ public class App extends Application {
         MainView mainView = new MainView();
         MainController controller = new MainController(primaryStage, mainView);
 
-        VBox root = new VBox(10,
+        VBox root = new VBox(5,
                 mainView.getImagePreview(),
                 mainView.getSelectImageBtn(),
-                new Label("Время смены:"),
-                new VBox(5,
+                mainView.getTimeSetting(),
+                new HBox(5,
                         new Label("Часы:"), mainView.getHourComboBox(),
                         new Label("Минуты:"), mainView.getMinuteComboBox()),
-                mainView.getAddToScheduleBtn(),
+                new VBox (0,
+                        new Label(" ")),
+                new HBox(5, mainView.getAddToScheduleBtn(), mainView.getRemoveFromScheduleBtn()),
                 mainView.getScheduleListView(),
-                mainView.getRemoveFromScheduleBtn(),
-                new VBox(5, mainView.getStartBtn(), mainView.getStopBtn()),
+                new HBox(5, mainView.getStartBtn(), mainView.getStopBtn()),
                 mainView.getStatusLabel()
         );
         root.setPadding(new javafx.geometry.Insets(10));
+        VBox.setMargin(mainView.getTimeSetting(), new Insets(15, 0, 0, 0));
+        VBox.setMargin(mainView.getScheduleListView(), new Insets(0, 0, 15, 0));
 
         primaryStage.setScene(new Scene(root, 400, 600));
         primaryStage.setTitle("Планировщик обоев");

@@ -1,4 +1,3 @@
-
 package com.example.wallpaper_app;
 
 import javafx.application.Platform;
@@ -46,7 +45,7 @@ public class MainController {
 
     private void addToSchedule() {
         if (selectedImage == null) {
-            view.getStatusLabel().setText("Сначала выберите изображение!");
+            view.getStatusLabel().setText("Сначала выберите изображение❗");
             return;
         }
 
@@ -83,7 +82,7 @@ public class MainController {
 
     private void changeWallpaper() {
         if (selectedImage == null) {
-            view.getStatusLabel().setText("Сначала выберите изображение!");
+            view.getStatusLabel().setText("Сначала выберите изображение❗");
             return;
         }
 
